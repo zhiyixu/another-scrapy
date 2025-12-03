@@ -5,7 +5,7 @@ PIPELINES = {
     "pipelines.CleanPipeline": 15,
 }
 
-MIDDLEWARWS = {
+MIDDLEWARES = {
     "middlewares.UserAgentMiddleware": 20,
     "middlewares.RetryMiddleware": 25,
 }

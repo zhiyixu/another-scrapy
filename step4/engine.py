@@ -12,7 +12,7 @@ class Engine:
         self.spider = spider
         self.scheduler = Scheduler()
         self.pipes = self._dload(d=settings.PIPELINES)
-        self.mwares = self._dload(d=settings.MIDDLEWARWS)
+        self.mwares = self._dload(d=settings.MIDDLEWARES)
 
     def _dload(self, d: dict):
         ll = []
