@@ -1,13 +1,13 @@
-from typing import Optional 
+from typing import Optional, Iterable, Union
 from request import Request 
-
+from spider import Spider
 
 class Middleware:
 
-    def open_spider(self, spider):
+    def open_spider(self, spider: Spider):
         print(f"[{self.__class__.__name__}] open_spider")
 
-    def close_spider(self, spider):
+    def close_spider(self, spider: Spider):
         print(f"[{self.__class__.__name__}] open_spider")
 
 class UserAgentMiddleware(Middleware):
@@ -31,9 +31,45 @@ class RetryMiddleware(Middleware):
         current = getattr(request, "_retries", 0)
         if current > self.max_reties:
             return None 
-        request._retries = current + 1 
-        print(f"[RetryMiddleware] retry {request.url} {request._retries} times.")
+        request._retries = current + 1 # dynamic binding # type: ignore
+        print(f"[RetryMiddleware] retry {request.url} {request._retries} times.") # type: ignore
         import requests
         resp = requests.get(request.url, headers=request.headers or {})
         resp.raise_for_status()
         return resp.text
+
+
+class SpiderMidderware(Middleware):...
+
+
+class StartLogMiddleware(SpiderMidderware):
+
+    def process_start_requests(self, start_requests: Iterable[Request], spider: Spider):
+        for req in start_requests:
+            print(f"[StartLogMiddleware] start request: {req.url}")
+            yield req 
+
+class HtmlGuardMiddleware(SpiderMidderware):
+
+    def process_spider_input(self, html_text: str, spider: Spider):
+        if not html_text or not html_text.strip():
+            raise ValueError("Empty response.")
+        
+class SpiderExceptionFallbackMiddleware(SpiderMidderware):
+
+    def process_spider_exception(self, html_text: str, exception: Exception, spider: Spider):
+        yield {
+            "type": "spider_exception",
+            "spider": getattr(spider, "name", spider.__class__.__name__),
+            "error": repr(exception)
+        }
+
+class EinsteinOnlyMiddleware(SpiderMidderware):
+
+    def process_spider_output(self, html_text: str, results: Iterable[Union[Request, dict]], spider: Spider):
+        for r in results:
+            if isinstance(r, Request):
+                yield r 
+            else:
+                if r.get("auther") == "Albert Einstein":
+                    yield r

@@ -5,6 +5,7 @@ from spiders import Spider
 from scheduler import Scheduler
 import misc
 import settings
+from typing import Union, Any
 
 class Engine:
 
@@ -13,6 +14,7 @@ class Engine:
         self.scheduler = Scheduler()
         self.pipes = self._dload(d=settings.PIPELINES)
         self.mwares = self._dload(d=settings.MIDDLEWARES)
+        self.spmwares = self._dload(d=settings.SPIDER_MIEELEWARES)
 
     def _dload(self, d: dict):
         ll = []
@@ -36,20 +38,28 @@ class Engine:
         """打开爬虫时，先把初始请求放进队列"""
         self._open(clss=self.pipes)
         self._open(clss=self.mwares)
+        self._open(clss=self.spmwares)
+
+        reqs = self.spider.start_requests()
+        for spm in self.spmwares:
+            if hasattr(spm, "process_start_requests"):
+                req = spm.process_start_requests(start_requests=reqs)
+
         for req in self.spider.start_requests():
             self.scheduler.add_request(req)
 
     def close_spider(self):
         self._close(clss=self.pipes)
         self._close(clss=self.mwares)
+        self._close(clss=self.spmwares)
     
-    def _download(self, request: Request) -> str:
+    def _download(self, request: Union[Request, Any]) -> str:
         """超级简化的下载器"""
         resp = requests.get(request.url, headers=request.headers or {})
         resp.raise_for_status()
         return resp.text
 
-    def _download_with_middlewares(self, request: Request) -> str:
+    def _download_with_middlewares(self, request: Union[Request,None]) -> str:
         """执行 downloader middlewares + 真正下载"""
 
         # 1. 依次执行 process_request
@@ -62,7 +72,7 @@ class Engine:
             response_text = self._download(request)
         except Exception as exc:
             handled = None
-            for mw in reversed(self.mwares):
+            for mw in reversed(self.mwares): # 此处异常处理要反向处理
                 if hasattr(mw, "process_exception"):
                     result = mw.process_exception(request, exc)
                     if isinstance(result, str):
@@ -71,7 +81,7 @@ class Engine:
             if handled is None:
                 # 没有中间件能处理这个异常，就直接抛出去
                 raise
-            response_text = handled
+            response_text = handled # 经过异常处理， 认为返回值已经被正确统一的包装为response
 
         # 3. 依次（反向）执行 process_response
         for mw in reversed(self.mwares):

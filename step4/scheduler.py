@@ -1,6 +1,6 @@
 import queue 
 from request import Request
-
+from typing import Union, Any
 
 class Scheduler:
 
@@ -15,7 +15,7 @@ class Scheduler:
         else:
             print(f"Skip: {request.url}")
 
-    def get_request(self):
+    def get_request(self) -> Union[Request, Any]:
         if not self.queue.empty():
             return self.queue.get()
         return None 
