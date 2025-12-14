@@ -16,3 +16,9 @@ SPIDER_MIEELEWARES = {
     "middlewares.SpiderExceptionFallbackMiddleware": 20,
     "middlewares.EinsteinOnlyMiddleware": 20,
 }
+
+SCHEDILER = "scheduler.SimpleScheduler"
+
+DUPEFILTER = "dupefilters.MemoryDipeFilter"
+
+SCHEDILER_QUEUE = "queues.PriorityQueue"

@@ -8,3 +8,4 @@ class Request:
     url: str
     callback: Callable[[str], Iterable[Union["Request", dict]]] | Any
     headers: Optional[Dict[str, str]] = None
+    priority: int = 0

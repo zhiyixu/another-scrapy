@@ -11,11 +11,18 @@ class Engine:
 
     def __init__(self, spider: Spider):
         self.spider = spider
-        self.scheduler = Scheduler()
+        self.scheduler = self._load_scheduler()
         self.pipes = self._dload(d=settings.PIPELINES)
         self.dwmwares = self._dload(d=settings.DOWNLOADER_MIDDLEWARES)
         self.spmwares = self._dload(d=settings.SPIDER_MIEELEWARES)
 
+    
+    def _load_scheduler(self):
+        scheduler = misc.dload(settings.SCHEDILER)
+        dupefilter = misc.dload(settings.DUPEFILTER)
+        q = misc.dload(settings.SCHEDILER_QUEUE) 
+        return scheduler(dupefilter=dupefilter(), q=q())
+    
     def _dload(self, d: dict):
         ll = []
         pths = sorted(d.items(), key=lambda x: x[1])
@@ -39,6 +46,9 @@ class Engine:
         self._open(clss=self.pipes)
         self._open(clss=self.dwmwares)
         self._open(clss=self.spmwares)
+        
+        if hasattr(self.scheduler, "open"):
+            self.scheduler.open()
 
         reqs = self.spider.start_requests()
         for spm in self.spmwares:
@@ -46,12 +56,15 @@ class Engine:
                 req = spm.process_start_requests(start_requests=reqs, spider=self.spider)
 
         for req in self.spider.start_requests():
-            self.scheduler.add_request(req)
+            self.scheduler.enqueue_request(req)
 
     def close_spider(self):
         self._close(clss=self.pipes)
         self._close(clss=self.dwmwares)
         self._close(clss=self.spmwares)
+
+        if hasattr(self.scheduler, "close"):
+            self.scheduler.open()
     
     def _download(self, request: Union[Request, Any]) -> str:
         """超级简化的下载器"""
@@ -121,13 +134,15 @@ class Engine:
     def start(self):
         """核心循环：从队列拿 Request -> 下载 -> 回调处理"""
         self.open_spider()
-        while self.scheduler.has_requests():
-            req = self.scheduler.get_request()
+        while self.scheduler.has_pending_requests():
+            req = self.scheduler.next_request()
+            if req is None:
+                break
             html = self._download_with_middlewares(req)
             for result in self._call_spider(html_text=html, req=req):
                 if isinstance(result, Request):
                     # 新的请求，继续加入队列
-                    self.scheduler.add_request(result)
+                    self.scheduler.enqueue_request(result)
                 else:
                     # 简单认为是 item，打印出来
                     item = result
