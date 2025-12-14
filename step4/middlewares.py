@@ -71,5 +71,5 @@ class EinsteinOnlyMiddleware(SpiderMidderware):
             if isinstance(r, Request):
                 yield r 
             else:
-                if r.get("auther") == "Albert Einstein":
+                if r.get("author") == "Albert Einstein":
                     yield r
