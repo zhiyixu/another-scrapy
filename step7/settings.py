@@ -21,6 +21,6 @@ SCHEDULER = "scheduler.SimpleScheduler"
 
 ASYNC_SCHEDULER = "scheduler.AsyncScheduler"
 
-DUPEFILTER = "dupefilters.MemoryDipeFilter"
+DUPEFILTER = "dupefilters.MemoryDupeFilter"
 
 SCHEDILER_QUEUE = "queues.PriorityQueue"

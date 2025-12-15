@@ -8,7 +8,7 @@ class Middleware:
         print(f"[{self.__class__.__name__}] open_spider")
 
     def close_spider(self, spider: Spider):
-        print(f"[{self.__class__.__name__}] open_spider")
+        print(f"[{self.__class__.__name__}] close_spider")
 
 class UserAgentMiddleware(Middleware):
 

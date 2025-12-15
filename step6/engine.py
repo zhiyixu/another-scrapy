@@ -18,7 +18,7 @@ class Engine:
 
     
     def _load_scheduler(self):
-        scheduler = misc.dload(settings.SCHEDILER)
+        scheduler = misc.dload(settings.SCHEDULER)
         dupefilter = misc.dload(settings.DUPEFILTER)
         q = misc.dload(settings.SCHEDILER_QUEUE) 
         return scheduler(dupefilter=dupefilter(), q=q())

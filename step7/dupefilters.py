@@ -14,7 +14,7 @@ class BaseDupeFilter(ABC):
     def request_seen(self, request: Request) -> bool:...
 
 
-class MemoryDipeFilter(BaseDupeFilter):
+class MemoryDupeFilter(BaseDupeFilter):
 
     def __init__(self):
         self._seen = set() 

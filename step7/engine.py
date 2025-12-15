@@ -21,7 +21,7 @@ class Engine:
 
     
     def _load_scheduler(self):
-        scheduler = misc.dload(settings.SCHEDILER)
+        scheduler = misc.dload(settings.SCHEDULER)
         dupefilter = misc.dload(settings.DUPEFILTER)
         q = misc.dload(settings.SCHEDILER_QUEUE) 
         return scheduler(dupefilter=dupefilter(), q=q())
@@ -67,7 +67,7 @@ class Engine:
         self._close(clss=self.spmwares)
 
         if hasattr(self.scheduler, "close"):
-            self.scheduler.open()
+            self.scheduler.close()
     
     def _download(self, request: Union[Request, Any]) -> str:
         """超级简化的下载器"""
@@ -215,7 +215,7 @@ class AsyncEngine:
         self._close(clss=self.spmwares)
 
         if hasattr(self.scheduler, "close"):
-            await self.scheduler.open()
+            await self.scheduler.close()
     
     async def _download(self, request: Union[Request, Any]) -> str:
         """超级简化的下载器"""
