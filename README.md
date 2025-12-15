@@ -3,4 +3,6 @@ another scrapy
 洋葱模型保证了框架在设计时候的语义正确性 Onion Model
 谁最后处理 request 谁就必须先处理response
 
-process_start_requests 进针对最开始的请求， 后续抓取过程中产生的请求就不会再走这个中间件的函数了
+process_start_requests 进针对最开始的请求， 后续抓取过程中产生的请求就不会再走这个中间件的函数了  
+
+step7/ convert it to async mod
